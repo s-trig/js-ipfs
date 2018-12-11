@@ -50,7 +50,7 @@ describe('name', function () {
       this.timeout(50 * 1000)
       df.spawn({
         exec: IPFS,
-        args: [`--pass ${hat()}`],
+        args: [`--pass ${hat()}`, '--local'],
         config: { Bootstrap: [] }
       }, (err, _ipfsd) => {
         expect(err).to.not.exist()
@@ -152,7 +152,7 @@ describe('name', function () {
       this.timeout(40 * 1000)
       df.spawn({
         exec: IPFS,
-        args: [`--pass ${hat()}`],
+        args: [`--pass ${hat()}`, '--local'],
         config: { Bootstrap: [] }
       }, (err, _ipfsd) => {
         expect(err).to.not.exist()
@@ -203,8 +203,18 @@ describe('name', function () {
     const createNode = (callback) => {
       df.spawn({
         exec: IPFS,
-        args: [`--pass ${hat()}`, '--enable-dht-experiment'],
-        config: { Bootstrap: [] }
+        args: [`--pass ${hat()}`],
+        config: {
+          Bootstrap: [],
+          Discovery: {
+            MDNS: {
+              Enabled: false
+            },
+            webRTCStar: {
+              Enabled: false
+            }
+          }
+        }
       }, callback)
     }
 
@@ -283,7 +293,17 @@ describe('name', function () {
       df.spawn({
         exec: IPFS,
         args: [`--pass ${hat()}`],
-        config: { Bootstrap: [] }
+        config: {
+          Bootstrap: [],
+          Discovery: {
+            MDNS: {
+              Enabled: false
+            },
+            webRTCStar: {
+              Enabled: false
+            }
+          }
+        }
       }, (err, _ipfsd) => {
         expect(err).to.not.exist()
         ipfsd = _ipfsd
@@ -319,9 +339,9 @@ describe('name', function () {
       const stub = sinon.stub(node._ipns.publisher, '_updateOrCreateRecord').callsArgWith(4, 'error')
 
       node.name.publish(ipfsRef, { resolve: false }, (err) => {
-        expect(err).to.exist()
-
         stub.restore()
+
+        expect(err).to.exist()
         done()
       })
     })
@@ -337,10 +357,10 @@ describe('name', function () {
       const stub = sinon.stub(Key, 'isKey').returns(false)
 
       node.name.publish(ipfsRef, { resolve: false }, (err) => {
+        stub.restore()
+
         expect(err).to.exist()
         expect(err.code).to.equal('ERR_INVALID_DATASTORE_KEY')
-
-        stub.restore()
         done()
       })
     })
@@ -349,10 +369,10 @@ describe('name', function () {
       const stub = sinon.stub(node._ipns.publisher._datastore, 'get').callsArgWith(1, 'error-unexpected')
 
       node.name.publish(ipfsRef, { resolve: false }, (err) => {
+        stub.restore()
+
         expect(err).to.exist()
         expect(err.code).to.equal('ERR_DETERMINING_PUBLISHED_RECORD')
-
-        stub.restore()
         done()
       })
     })
@@ -361,10 +381,10 @@ describe('name', function () {
       const stub = sinon.stub(node._ipns.publisher._datastore, 'put').callsArgWith(2, 'error-unexpected')
 
       node.name.publish(ipfsRef, { resolve: false }, (err) => {
+        stub.restore()
+
         expect(err).to.exist()
         expect(err.code).to.equal('ERR_STORING_IN_DATASTORE')
-
-        stub.restore()
         done()
       })
     })
@@ -393,9 +413,10 @@ describe('name', function () {
         expect(res).to.exist()
 
         node.name.resolve(nodeId, { nocache: true }, (err) => {
+          stub.restore()
+
           expect(err).to.exist()
           expect(err.code).to.equal('ERR_UNEXPECTED_ERROR_GETTING_RECORD')
-          stub.restore()
           done()
         })
       })
@@ -409,9 +430,10 @@ describe('name', function () {
         expect(res).to.exist()
 
         node.name.resolve(nodeId, { nocache: true }, (err) => {
+          stub.restore()
+
           expect(err).to.exist()
           expect(err.code).to.equal('ERR_NO_RECORD_FOUND')
-          stub.restore()
           done()
         })
       })
@@ -425,9 +447,10 @@ describe('name', function () {
         expect(res).to.exist()
 
         node.name.resolve(nodeId, { nocache: true }, (err) => {
+          stub.restore()
+
           expect(err).to.exist()
           expect(err.code).to.equal('ERR_INVALID_RECORD_RECEIVED')
-          stub.restore()
           done()
         })
       })
@@ -453,8 +476,18 @@ describe('name', function () {
       this.timeout(40 * 1000)
       df.spawn({
         exec: IPFS,
-        args: [`--pass ${hat()}`],
-        config: { Bootstrap: [] }
+        args: [`--pass ${hat()}`, '--local'],
+        config: {
+          Bootstrap: [],
+          Discovery: {
+            MDNS: {
+              Enabled: false
+            },
+            webRTCStar: {
+              Enabled: false
+            }
+          }
+        }
       }, (err, _ipfsd) => {
         expect(err).to.not.exist()
         node = _ipfsd.api
